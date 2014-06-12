@@ -18,7 +18,8 @@ During the data analysis phase five major tasks with several sub tasks were perf
 **1a.  Load the data**  
 It is assumed that the "activity.csv" file is present in the working directory.  
 
-```{r, echo = TRUE}
+
+```r
 # Read the activity.csv file in a data frame
 if (!file.exists("activity.csv")) {sprintf("No such file")}
 if (file.exists("activity.csv")) {
@@ -31,20 +32,29 @@ if (file.exists("activity.csv")) {
     # Report the count of NA's in the activity data set
     naCount <- length(which(is.na(act) == TRUE))
 }
-   
 ```
-There are `r nRows` records and `r nCols` features in the data set with `r naCount` records containing misssing values (NA).  
+There are 17568 records and 3 features in the data set with 2304 records containing misssing values (NA).  
 Also note that the feature 'date' is of char type not a date type.  
 
 **1b.  Process/transform the data into a format suitable for the analysis**  
 Check the missing values in all three features and their type.  
 
-```{r, echo = TRUE}
+
+```r
 ## 1. Data Transformation
 
 # First examine the structure of the data
 strt <- str(act)
+```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : chr  "2012-10-01" "2012-10-01" "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+```r
 # Convert the date column data into Date type 
 act$date <- as.Date(act$date, format="%Y-%m-%d")
  
@@ -54,7 +64,7 @@ act2 <- act[!complete.cases(act),]
 naCount1 <- dim(act1)[1]
 naCount2 <- dim(act2)[1]
 ```
-The feature 'date' is converted from chr (character) to date type, then a sub-set of activity data is created with no missing values i.e. all missing values ignored. The resulting sub-data set contains `r naCount1` records with `r nCols` features.  
+The feature 'date' is converted from chr (character) to date type, then a sub-set of activity data is created with no missing values i.e. all missing values ignored. The resulting sub-data set contains 15264 records with 3 features.  
 
 
 **2. Total number of steps taken per day**  
@@ -62,7 +72,8 @@ The feature 'date' is converted from chr (character) to date type, then a sub-se
 **2a.  Histogram of the total number of steps taken each day**  
 This histogram is produced using the data set 'act1' which contains no missing values.
 
-```{r fig.width=7, fig.height=6, echo = TRUE}
+
+```r
 # Aggregate total number of steps taken each day
 sumStepsDaily1 <- aggregate(act1$steps, by=list(act1$date), FUN=sum)
 colnames(sumStepsDaily1) <- c("date", "stepsSum")
@@ -79,23 +90,26 @@ pHist1 <- ggplot(sumStepsDaily1, aes(x=stepsSum)) + geom_histogram() +
 suppressMessages(print(pHist1))
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+
 **2b. Mean and Median of total number of steps taken per day**  
 
-```{r, echo = TRUE}
+
+```r
 # Find mean and median total number of steps taken per day 
 stepsMean1 <- mean(sumStepsDaily1$stepsSum)
 stepsMedian1 <- median(sumStepsDaily1$stepsSum)
-
 ```
-Mean of the total number of steps taken per day: `r sprintf("%.2f", stepsMean1)`  
-Median of the total number of steps taken per day: `r stepsMedian1`  
+Mean of the total number of steps taken per day: 10766.19  
+Median of the total number of steps taken per day: 10765  
 
 **3. Average daily activity pattern**
 
 **3a. Time series plot**  
 This time series plot is produced by starting from the data set 'act1' which contains no missing values.
 
-```{r fig.width=7, fig.height=6, echo = TRUE}
+
+```r
 # Mean of the steps taken for each interval averaged across all days
 meanStepsDF1 <- aggregate(act1$steps, by=list(act1$interval), FUN=mean)
 colnames(meanStepsDF1) <- c("interval", "stepsMean")
@@ -111,25 +125,29 @@ pLine <- ggplot(meanStepsDF1, aes(x = interval, y = stepsMean)) +
 suppressMessages(print(pLine))
 ```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+
 **3b. Maximum number of steps**   
-```{r, echo = TRUE}
+
+```r
 # 3b. Which 5-minute interval, on average across all the 
 # days in the dataset, contains the maximum number of steps?
 maxStepsMean1 <- meanStepsDF1[meanStepsDF1$stepsMean == max(meanStepsDF1$stepsMean),]
 ```
-The five minute interval containing maximum number of steps: `r maxStepsMean1[1]`   
-The maximum number of steps averaged across all days: `r maxStepsMean1[2]`
+The five minute interval containing maximum number of steps: 835   
+The maximum number of steps averaged across all days: 206.1698
 
 **4. Imputing missing values**
 
 **4a. Report missing values** 
 
-```{r, echo = TRUE}
+
+```r
 # 4a. Calculate and report the total number of missing values 
 # in the dataset (i.e. the total number of rows with NAs)
 naCount <- length(which(is.na(act) == TRUE))
 ```
-Total number of missing values: `r naCount`  
+Total number of missing values: 2304  
 
 **4b. Strategy for filling missing values**  
 
@@ -139,7 +157,8 @@ Fill the missing value in the original data set 'act' using the data set "meanSt
 
 **4c. Create data set with filled missing values**  
 
-```{r, echo = TRUE}
+
+```r
 # 4c. Create a new dataset that is equal to the original 
 # dataset but with the missing data filled in.
 
@@ -152,7 +171,8 @@ for (i in 1:length(act$steps)) {
 
 **4d. Histogram of the total number of steps taken each day with filled values**
 
-```{r fig.width=7, fig.height=6, echo = TRUE}
+
+```r
 # 4d. Make a histogram of the total number of steps taken each day and Calculate and report 
 # the mean and median total number of steps taken per day. Do these values differ from 
 # the estimates from the first part of the assignment? What is the impact of imputing 
@@ -171,23 +191,28 @@ pHist2 <- ggplot(sumStepsDaily, aes(x=stepsSum)) + geom_histogram() +
        scale_x_continuous(name="Total steps")
 
 suppressMessages(print(pHist2))
+```
 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
+
+```r
 # Find mean and median of total number of steps taken per day 
 stepsMean2 <- mean(sumStepsDaily$stepsSum)
 stepsMedian2 <- median(sumStepsDaily$stepsSum)
 ```
 
-Mean of total number of steps taken per day (filled data):  `r sprintf("%.2f", stepsMean2)`  
-Median of total number of steps taken per day (filled data):  `r sprintf("%.2f", stepsMedian2)`  
+Mean of total number of steps taken per day (filled data):  10766.19  
+Median of total number of steps taken per day (filled data):  10766.19  
 
 As reported previously in section 2b:  
-Mean of total number of steps taken per day (missing values ignored):  `r sprintf("%.2f", stepsMean1)`  
-Median of total number of steps taken per day (missing values ignored):  `r sprintf("%.2f", stepsMedian1)`  
+Mean of total number of steps taken per day (missing values ignored):  10766.19  
+Median of total number of steps taken per day (missing values ignored):  10765.00  
 
 **5. Differences in activity patterns between weekdays and weekends**
 
 **5a. Create new factor variable indicating weekday/weekend** 
-```{r, echo = TRUE}
+
+```r
 # For this part the weekdays() function may be of some help here. 
 # Use the dataset with the filled-in missing values for this part.
 
@@ -211,7 +236,8 @@ colnames(meanStepsDF2) <- c("interval", "dayType", "stepsMean")
 ```
 
 **5b. Time series plots (week days and week ends)**
-```{r fig.width=7, fig.height=6, echo = TRUE}
+
+```r
 # Make a time series plot (i.e. type = "l") of the 5-minute interval 
 # separately for weekend and weekday.
  
@@ -221,6 +247,8 @@ pXyplot <- xyplot(stepsMean ~ interval | dayType , data=meanStepsDF2,
 
 print(pXyplot)
 ```
+
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11.png) 
 
 
 ### References  
